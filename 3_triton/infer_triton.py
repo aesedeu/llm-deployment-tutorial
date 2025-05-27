@@ -6,6 +6,8 @@ from transformers import BertTokenizer
 import tritonclient.grpc.aio as grpcclient
 from tritonclient.grpc import service_pb2, service_pb2_grpc
 from tritonclient.utils import triton_to_np_dtype
+# from tritonclient.http import InferenceServerClient, InferInput, InferRequestedOutput
+from tritonclient.http.aio import InferenceServerClient, InferInput, InferRequestedOutput
 
 
 class InferenceLLMModule:
@@ -18,7 +20,7 @@ class InferenceLLMModule:
     async def infer_text(
         self,
         text: str,
-        model_name: str = "rubert_onnx",
+        model_name: str = "bert_model",
     ) -> dict:
         """Perform inference on the input text."""
 
@@ -74,3 +76,65 @@ class InferenceLLMModule:
         config_response = grpc_stub.ModelConfig(config_request)
 
         return metadata_response, config_response
+
+from tritonclient.http.aio import (
+    InferenceServerClient,
+    InferInput,
+    InferRequestedOutput,
+)
+
+class InferenceLinearModel:
+    def __init__(self) -> None:
+        self.url = os.environ.get("TRITON_SERVER_URL", "localhost:8000")
+        self.client = None
+
+    async def init(self):
+        """Асинхронная инициализация клиента Triton."""
+        self.client = InferenceServerClient(url=self.url, verbose=False)
+
+    async def infer(
+        self,
+        input_array: np.ndarray,
+        model_name: str = "classic_model",
+        model_version: str = None
+    ) -> float:
+        """
+        Perform inference with linear regression model.
+
+        Args:
+            input_array (np.ndarray): shape (n_features,)
+            model_name (str): Name of the model on Triton
+
+        Returns:
+            float: Predicted value
+        """
+
+        if self.client is None:
+            await self.init()
+
+        if input_array.ndim == 1:
+            input_array = input_array.reshape(1, -1)  # shape (1, n_features)
+
+        # Prepare Triton inputs
+        inputs = [InferInput("input", input_array.shape, "FP32")]
+        inputs[0].set_data_from_numpy(input_array.astype(np.float32))
+
+        # Define requested output
+        outputs = [InferRequestedOutput("variable")]
+
+        # Run inference
+        results = await self.client.infer(
+            model_name=model_name,
+            model_version=model_version,
+            inputs=inputs,
+            outputs=outputs,
+        )
+        output_data = results.as_numpy("variable")
+
+        return float(output_data[0][0])  # Assuming output is shape (1, 1)
+
+    def get_model_metadata(self, model_name: str = "linear_regression"):
+        return self.client.get_model_metadata(model_name=model_name)
+
+    def get_model_config(self, model_name: str = "linear_regression"):
+        return self.client.get_model_config(model_name=model_name)

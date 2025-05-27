@@ -20,6 +20,20 @@ services:
     #         - capabilities: [gpu]
     #           count: 1
 
+  # Контейнер для конвертации модели в trt из onnx
+  trtexec_container:
+    container_name: trtexec_container
+    image: nvcr.io/nvidia/tensorrt:24.09-py3
+    volumes:
+      - ./trtexec_workspace:/workspace
+    command: ["tail", "-f", "/dev/null"]
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - capabilities: [gpu]
+    #           count: 1
+
   # Prometheus для сбора метрик
   prometheus:
     container_name: prometheus

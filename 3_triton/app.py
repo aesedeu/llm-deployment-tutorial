@@ -4,10 +4,12 @@ from contextlib import asynccontextmanager
 import joblib
 import uvicorn
 import asyncio
+import numpy as np
 
-# from infer_triton import InferenceLLMModule
+from infer_triton import InferenceLLMModule, InferenceLinearModel
 
-# inference_module = InferenceLLMModule()
+inference_llm_module = InferenceLLMModule()
+inference_linear_module = InferenceLinearModel()
 
 @asynccontextmanager
 async def startup(app: FastAPI):
@@ -35,29 +37,45 @@ async def classic(data: IncomeData):
     return {"detail": res}
 
 
-# @app.post(
-#     "/predict/", description="Выполняет инференс текста через модель ruBERT в Triton."
-# )
-# async def predict(
-#     payload: TextInput, model_name: str = Query(..., description="Имя модели в Triton")
-# ):
-#     """
-#     Выполнить инференс текста.
+@app.post("/triton_classic_ml")
+async def classic(
+    payload: IncomeData,
+    model_name: str = Query(..., description="Имя модели в Triton"),
+    model_version: str = Query(..., description="Версия модели в Triton")
+):
+    result = await inference_linear_module.infer(
+        np.array([payload.a, payload.b, payload.c]),
+        model_name=model_name,
+        model_version=model_version
+    )
 
-#     Args:
-#         payload (TextInput): Ввод текста.
-#         model_name (str): Имя модели в Triton.
+    return {"detail": result}
 
-#     Returns:
-#         dict: Эмбеддинг CLS токена (или другой выход, если нужно).
-#     """
-#     try:
-#         result = await inference_module.infer_text(payload.text, model_name=model_name)
 
-#         return {"embedding": result["embedding"]}
+@app.post(
+    "/triton_llm", description="Выполняет инференс текста через модель ruBERT в Triton."
+)
+async def predict(
+    payload: TextInput,
+    model_name: str = Query(..., description="Имя модели в Triton")
+):
+    """
+    Выполнить инференс текста.
 
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+    Args:
+        payload (TextInput): Ввод текста.
+        model_name (str): Имя модели в Triton.
+
+    Returns:
+        dict: Эмбеддинг CLS токена (или другой выход, если нужно).
+    """
+    try:
+        result = await inference_llm_module.infer_text(payload.text, model_name=model_name)
+
+        return {"embedding": result["embedding"]}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
 if __name__ == "__main__":

@@ -2,11 +2,17 @@ import aiohttp
 import asyncio
 import time
 
+N = 10000
 
 async def send_request(session):
     try:
         async with session.post(
-            "http://localhost:8080/classic", json={"a": 1, "b": 2, "c": 3}
+            "http://localhost:8080/triton_classic_ml",
+            json={"a": 1, "b": 2, "c": 3},
+            params={
+                "model_name": "classic_model",
+                "model_version": 1
+            },
         ) as response:
             if response.status == 200:
                 result = await response.json()
@@ -23,7 +29,7 @@ async def main():
     """Основная функция для отправки асинхронных запросов."""
     tasks = []
     async with aiohttp.ClientSession() as session:
-        for i in range(10000):
+        for i in range(N):
             task = asyncio.create_task(send_request(session))
             tasks.append(task)
 
@@ -39,4 +45,4 @@ async def main():
 start_time = time.time()
 asyncio.run(main())
 elapsed_time = time.time() - start_time
-print(f"All requests completed in {elapsed_time:.2f} seconds.")
+print(f"All requests {N} completed in {elapsed_time:.2f} seconds.")

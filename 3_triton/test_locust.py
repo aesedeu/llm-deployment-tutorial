@@ -25,13 +25,37 @@ class ApiUser(HttpUser):
         except Exception as e:
             print(f"Error during request: {e}")
 
-    # llm model inferencec
+    # triton ONNX classic model inferencece
     @task
     def predict_llm(self):
         try:
             self.client.post(
-                "/predict/",
-                params={"model_name": MODEL_NAME},
+                "/triton_classic_ml/",
+                params={"model_name": "classic_model", "model_version": 1}, # можно указать версию модели
+                json={"text": "some text for locust inference"},
+            )
+        except Exception as e:
+            print(f"Error during request: {e}")
+
+    # triton ONNX llm model inferencece
+    @task
+    def predict_llm(self):
+        try:
+            self.client.post(
+                "/triton_llm/",
+                params={"model_name": "bert_model"},
+                json={"text": "some text for locust inference"},
+            )
+        except Exception as e:
+            print(f"Error during request: {e}")
+
+    # triton TensorRT llm model inferencece
+    @task
+    def predict_llm(self):
+        try:
+            self.client.post(
+                "/triton_llm/",
+                params={"model_name": "bert_trt"},
                 json={"text": "some text for locust inference"},
             )
         except Exception as e:

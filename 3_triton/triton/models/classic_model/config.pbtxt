@@ -1,0 +1,32 @@
+name: "classic_model"
+platform: "onnxruntime_onnx"
+max_batch_size: 1024
+
+version_policy: {
+  all {}
+}
+
+input [
+  {
+    name: "input"
+    data_type: TYPE_FP32
+    dims: [ 3 ]  # Кол-во признаков
+  }
+]
+output [
+  {
+    name: "variable"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+  }
+]
+dynamic_batching {
+  max_queue_delay_microseconds: 10000
+  preferred_batch_size: [256, 1024]
+}
+instance_group [
+  {
+    count: 6
+    kind: KIND_CPU
+  }
+]

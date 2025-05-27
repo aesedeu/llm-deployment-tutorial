@@ -1,5 +1,5 @@
-name: "bert_model"
-platform: "onnxruntime_onnx"
+name: "bert_trt"
+platform: "tensorrt_plan"
 max_batch_size: 64
 
 input [
@@ -29,13 +29,13 @@ output [
 ]
 
 dynamic_batching {
-  max_queue_delay_microseconds: 10000
+  max_queue_delay_microseconds: 300000
   preferred_batch_size: [16, 32]
 }
 
 instance_group [
   {
-    count: 6
-    kind: KIND_CPU
+    count: 1
+    kind: KIND_GPU
   }
 ]
