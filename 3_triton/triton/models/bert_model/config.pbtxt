@@ -1,0 +1,41 @@
+name: "bert_model"
+platform: "onnxruntime_onnx"
+max_batch_size: 64
+
+input [
+  {
+    name: "input_ids"
+    data_type: TYPE_INT64
+    dims: [ -1 ]  # динамическая длина последовательности
+  },
+  {
+    name: "attention_mask"
+    data_type: TYPE_INT64
+    dims: [ -1 ]
+  },
+  {
+    name: "token_type_ids"
+    data_type: TYPE_INT64
+    dims: [ -1 ]
+  }
+]
+
+output [
+  {
+    name: "pooler_output"
+    data_type: TYPE_FP32
+    dims: [ -1, 768 ]  # [seq_len, hidden_size]
+  }
+]
+
+dynamic_batching {
+  max_queue_delay_microseconds: 300000
+  preferred_batch_size: [8, 24]
+}
+
+instance_group [
+  {
+    count: 6
+    kind: KIND_CPU
+  }
+]

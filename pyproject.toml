@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "docker-llm-webinar"
+version = "0.1.0"
+description = ""
+authors = ["Eugene Chernov <ev7080@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^2.2.3"
+scikit-learn = "^1.6.1"
+seaborn = "^0.13.2"
+matplotlib = "^3.10.3"
+fastapi = "^0.115.12"
+locust = "^2.37.3"
+uvicorn = "^0.34.2"
+aiohttp = "^3.11.18"
+transformers = "^4.51.3"
+torch = "^2.7.0"
+onnx = "^1.18.0"
+tritonclient = "^2.57.0"
+grpcio = "^1.71.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 5s  # Интервал сбора метрик
+
+scrape_configs:
+  - job_name: 'triton'
+    static_configs:
+      - targets: ['triton:8002']  # Сбор метрик с Triton
