@@ -1,3 +1,15 @@
+# Запуск проекта 2_http_grpc
+## HTTP
+
+## grpc
+- Создаем модель в блокноте, копируем ее в `grpc_data`
+- В `grpc_data` запускаем
+```bash
+python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. model.proto
+```
+- Стартуем сервер
+- Можно дернуть ручку из блокнота или через Postman (необходимо приложить `model.proto` файл + указать ModelService + указать Message)
+
 # Запуск проекта 3_triton
 - `triton/bert_trt` необходимо перенести в `triton/models`, модель прочитается тритоном при условии что есть GPU nvidia
 - для отображения дашборда Grafana необходимо его экспортировать из файла `dash-grafana-triton.json`. Дополнительно необходимо в Grafana создать новое подключение к Prometheus
@@ -24,3 +36,13 @@ trtexec \
 python app.py
 ```
 - Для запуска тестов выполнить скрипты в директории `tests`
+
+# 4
+```bash
+python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. file_streamer.proto
+```
+
+# 5
+```bash
+python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. chat.proto
+```

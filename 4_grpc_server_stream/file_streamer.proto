@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+service FileStreamer {
+  rpc StreamFile(FileRequest) returns (stream FileLine);
+}
+
+message FileRequest {
+  string filename = 1;
+}
+
+message FileLine {
+  string line = 1;
+}
