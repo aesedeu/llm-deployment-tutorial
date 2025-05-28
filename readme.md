@@ -64,8 +64,17 @@ pip install "vllm[grpc]"
 
 python3 -m vllm.entrypoints.openai.api_server \
     --model gpt2 \
-    --port 8080 \
+    --port 8081 \
     --tensor-parallel-size 1
+
+python3 -m vllm.entrypoints.openai.api_server \
+    --model TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+    --port 8080 \
+    --tensor-parallel-size 1 \
+    --max-num-seqs 16 \
+    --max-num-batched-tokens 4096 \
+    --trust-remote-code
+    
 
 curl http://localhost:8080/v1/models
 curl http://localhost:8080/metrics

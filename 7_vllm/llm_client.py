@@ -7,7 +7,7 @@ def run():
     stub = llm_pb2_grpc.LLMServiceStub(channel)
 
     request = llm_pb2.GenerateRequest(
-        prompt="Once upon a time", max_tokens=256, temperature=0.8
+        prompt="Once upon a time", max_tokens=512, temperature=0.8
     )
 
     for response in stub.GenerateText(request):

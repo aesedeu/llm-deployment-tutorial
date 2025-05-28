@@ -10,6 +10,7 @@ class LLMService(llm_pb2_grpc.LLMServiceServicer):
     def GenerateText(self, request, context):
         payload = {
             "model": "gpt2",
+            # "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
             "prompt": request.prompt,
             "max_tokens": request.max_tokens,
             "temperature": request.temperature,

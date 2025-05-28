@@ -11,7 +11,8 @@ class LLMService(llm_pb2_grpc.LLMServiceServicer):
         response = requests.post(
             "http://localhost:8080/v1/completions",
             json={
-                "model": "gpt2",
+                # "model": "gpt2",
+                "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
                 "prompt": request.prompt,
                 "max_tokens": request.max_tokens,
                 "temperature": request.temperature,
