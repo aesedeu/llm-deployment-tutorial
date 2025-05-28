@@ -46,3 +46,38 @@ python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. file_streamer
 ```bash
 python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. chat.proto
 ```
+
+# 6
+```bash
+python -m grpc_tools.protoc -I=proto --python_out=. --grpc_python_out=. proto/chat.proto
+
+# запуск сервера на cuda
+python server.py
+
+# запуск сервера на macos
+OMP_NUM_THREADS=1 python server.py
+```
+
+# 7
+```bash
+pip install "vllm[grpc]"
+
+python3 -m vllm.entrypoints.openai.api_server \
+    --model gpt2 \
+    --port 8080 \
+    --tensor-parallel-size 1
+
+curl http://localhost:8080/v1/models
+
+python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. llm.proto
+
+curl http://localhost:8080/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt2",
+    "prompt": "Hello",
+    "max_tokens": 10
+  }'
+
+
+```

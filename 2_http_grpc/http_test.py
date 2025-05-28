@@ -2,7 +2,7 @@ import aiohttp
 import asyncio
 import time
 
-N = 10000
+N = 100000
 
 async def send_request(session):
     try:

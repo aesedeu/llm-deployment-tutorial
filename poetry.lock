@@ -3506,6 +3506,20 @@ files = [
 ]
 
 [[package]]
+name = "sseclient"
+version = "0.0.27"
+description = "Python client library for reading Server Sent Event streams."
+optional = false
+python-versions = "*"
+files = [
+    {file = "sseclient-0.0.27.tar.gz", hash = "sha256:b2fe534dcb33b1d3faad13d60c5a7c718e28f85987f2a034ecf5ec279918c11c"},
+]
+
+[package.dependencies]
+requests = ">=2.9"
+six = "*"
+
+[[package]]
 name = "starlette"
 version = "0.46.2"
 description = "The little ASGI library that shines."
@@ -4093,4 +4107,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "e7d55f67c476e2ba669ee68e898bd10826ccea8e0a830ef12caaa23be6fdbeef"
+content-hash = "801ccc13a1c2f34bfdffd382811886cea71af38df0e54cf552a338d28c6f62cc"

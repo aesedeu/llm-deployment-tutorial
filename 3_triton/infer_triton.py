@@ -138,3 +138,45 @@ class InferenceLinearModel:
 
     def get_model_config(self, model_name: str = "linear_regression"):
         return self.client.get_model_config(model_name=model_name)
+
+from transformers import GPT2Tokenizer
+
+
+class InferenceGPT2:
+    def __init__(self) -> None:
+        self.url = os.environ.get("TRITON_SERVER_URL", "localhost:8001")
+        self.client = grpcclient.InferenceServerClient(url=self.url)
+        self.tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+
+    async def infer(
+        self,
+        prompt: str,
+        model_name: str = "gpt2_model",
+        max_new_tokens: int = 10,
+    ) -> str:
+        tokens = self.tokenizer(prompt, return_tensors="np")
+        input_ids = tokens["input_ids"].astype(np.int64)
+
+        # ОЧЕНЬ ПЛОХОЙ ЦИКЛ С ПОСТОЯННЫМ ПЕРЕСЧЕТОМ ВСЕГО ТЕКСТА
+        for _ in range(max_new_tokens):
+            inputs = [grpcclient.InferInput("input_ids", input_ids.shape, "INT64")]
+            inputs[0].set_data_from_numpy(input_ids)
+
+            outputs = [grpcclient.InferRequestedOutput("logits")]
+
+            results = await self.client.infer(
+                model_name=model_name,
+                inputs=inputs,
+                outputs=outputs,
+            )
+
+            logits = results.as_numpy("logits")
+            next_token_id = int(np.argmax(logits[0, -1]))
+            next_token = np.array([[next_token_id]], dtype=np.int64)
+
+            # Append next token to the input
+            input_ids = np.concatenate([input_ids, next_token], axis=-1)
+
+        # Decode the full generated sequence
+        generated_text = self.tokenizer.decode(input_ids[0], skip_special_tokens=True)
+        return generated_text

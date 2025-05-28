@@ -3,3 +3,4 @@
 **/*.onnx
 **/*.joblib
 __pycache__
+**/*.pt

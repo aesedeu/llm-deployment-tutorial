@@ -78,6 +78,26 @@ async def predict(
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
+from infer_triton import InferenceGPT2
+
+inference_gpt2 = InferenceGPT2()
+
+
+@app.post("/triton_gpt2")
+async def gpt2_inference(
+    payload: TextInput,
+    model_name: str = Query("gpt2", description="Имя модели GPT-2 в Triton"),
+    max_new_tokens: str = Query(10, description="Количество токенов для генерации"),
+):
+    try:
+        result = await inference_gpt2.infer(
+            payload.text, model_name=model_name, max_new_tokens=int(max_new_tokens)
+        )
+        return {"generated_text": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Inference error: {str(e)}")
+
+
 if __name__ == "__main__":
     uvicorn.run(
         "app:app",

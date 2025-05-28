@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package chat;
+
+service GPTService {
+  rpc Generate (stream UserPrompt) returns (stream GeneratedToken);
+}
+
+message UserPrompt {
+  string text = 1;
+  float temperature = 2;
+}
+
+message GeneratedToken {
+  string token = 1;
+}
+
