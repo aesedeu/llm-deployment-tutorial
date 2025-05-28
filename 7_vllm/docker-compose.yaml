@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # Тритон для инференса моделей
+  vllm:
+    container_name: vllm
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080  # HTTP endpoint for inference
+    restart: always
+
+  # Prometheus для сбора метрик
+  prometheus-vllm:
+    container_name: prometheus-vllm
+    image: prom/prometheus:latest
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: always
+
+  # Grafana для визуализации метрик
+  grafana-vllm:
+    container_name: grafana-vllm
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Установите пароль для Grafana
+    restart: always

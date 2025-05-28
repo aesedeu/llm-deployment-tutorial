@@ -68,6 +68,7 @@ python3 -m vllm.entrypoints.openai.api_server \
     --tensor-parallel-size 1
 
 curl http://localhost:8080/v1/models
+curl http://localhost:8080/metrics
 
 python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. llm.proto
 
@@ -76,8 +77,27 @@ curl http://localhost:8080/v1/completions \
   -d '{
     "model": "gpt2",
     "prompt": "Hello",
-    "max_tokens": 10
+    "max_tokens": 100
   }'
-
-
 ```
+```
+gRPC клиент (llm_client.py)
+        │
+        ▼
+gRPC сервер (llm_server.py → LLMService)
+        │
+        ▼
+vLLM API сервер (localhost:8080/v1/completions, stream=True)
+        │
+        ▼
+[ токены приходят постепенно ]
+        │
+        ▼
+gRPC сервер читает токены и отправляет клиенту по stream
+        │
+        ▼
+gRPC клиент печатает их в консоль по мере поступления
+```
+
+Docker image
+- https://github.com/vllm-project/vllm/blob/main/docker/Dockerfile.arm
