@@ -1,26 +1,49 @@
-# Запуск проекта 2_http_grpc
-## HTTP
+# LLM Deployment Examples
 
-## grpc
-- Создаем модель в блокноте, копируем ее в `grpc_data`
-- В `grpc_data` запускаем
+This repository contains a collection of examples demonstrating different approaches to deploying Large Language Models (LLMs) and ML models in production. Each folder contains a specific example focusing on different deployment aspects and technologies.
+
+## Repository Structure
+
+### 1. Docker Basics (`1_docker/`)
+Introduction to containerization for ML models:
+- Basic Docker setup for ML applications
+- Best practices for containerizing ML models
+- Foundation for more complex deployment scenarios
+
+### 2. HTTP and gRPC Implementation (`2_http_grpc/`)
+Demonstrates two common API implementation approaches:
+- HTTP server implementation for model serving
+- gRPC server implementation with protobuf
+- Comparison between HTTP and gRPC approaches
+- Includes example client implementations and testing scripts
+- Jupyter notebook for model development and testing
+
+Running the example:
+1. Generate gRPC code from protobuf:
 ```bash
 python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. model.proto
 ```
-- Стартуем сервер
-- Можно дернуть ручку из блокнота или через Postman (необходимо приложить `model.proto` файл + указать ModelService + указать Message)
+2. Start the server (either HTTP or gRPC)
+3. Test using the provided notebook or Postman (for gRPC, include the `model.proto` file and specify ModelService + Message)
 
-# Запуск проекта 3_triton
-- `triton/bert_trt` необходимо перенести в `triton/models`, модель прочитается тритоном при условии что есть GPU nvidia
-- для отображения дашборда Grafana необходимо его экспортировать из файла `dash-grafana-triton.json`. Дополнительно необходимо в Grafana создать новое подключение к Prometheus
-- классические модели сначала нужно создать в файле `research.ipynb` и затем переместить в `triton/models/classic_model` в директории 1 и 2
-- имена ONNX-моделей должны быть только `model.onnx`
-- для конвертации модели в TensorRT необходимо переместить ONNX-модель в `trtexec_workspase`, зайти в контейнер 
+### 3. NVIDIA Triton Server (`3_triton/`)
+Integration with NVIDIA Triton Inference Server:
+- Model deployment using Triton server
+- Support for multiple model formats (ONNX, TensorRT)
+- Performance monitoring with Grafana and Prometheus
+- Model optimization examples
+- FastAPI integration for serving models
+
+Setup and running:
+1. Move `triton/bert_trt` to `triton/models` (requires NVIDIA GPU)
+2. Import Grafana dashboard from `dash-grafana-triton.json`
+3. Create models in `research.ipynb` and move to `triton/models/classic_model`
+4. For TensorRT conversion:
 ```bash
+# Enter TensorRT container
 docker exec -it trtexec_container bash
-```
-В контейнере с TRT выполнить команду для конвертации ONNX -> TensorRT
-```bash
+
+# Convert ONNX to TensorRT
 trtexec \
     --onnx=model.onnx \
     --saveEngine=model.plan \
@@ -30,43 +53,72 @@ trtexec \
     --fp16 \
     --useSpinWait
 ```
-Созданную модель переместить в `triton/models/bert_trt/1`
-- Запуск FastAPI
+5. Start FastAPI server:
 ```bash
 python app.py
 ```
-- Для запуска тестов выполнить скрипты в директории `tests`
 
-# 4
+### 4. gRPC Server Streaming (`4_grpc_server_stream/`)
+Implementation of server-side streaming with gRPC:
+- Demonstrates handling large file transfers
+- Server-side streaming patterns
+- Protobuf definitions for streaming services
+
+Setup:
 ```bash
 python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. file_streamer.proto
 ```
 
-# 5
+### 5. Bidirectional gRPC Streaming (`5_grpc_bidirectional_stream/`)
+Advanced gRPC streaming implementation:
+- Bidirectional streaming between client and server
+- Chat-like application example
+- Real-time communication patterns
+
+Setup:
 ```bash
 python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. chat.proto
 ```
 
-# 6
+### 6. LLM with gRPC (`6_llm_grpc/`)
+Integration of LLMs with gRPC:
+- LLM-specific gRPC service implementation
+- Support for both CUDA and CPU deployments
+- Optimized for machine learning model serving
+- Protobuf definitions for LLM services
+
+Setup and running:
 ```bash
+# Generate gRPC code
 python -m grpc_tools.protoc -I=proto --python_out=. --grpc_python_out=. proto/chat.proto
 
-# запуск сервера на cuda
+# Start server on CUDA
 python server.py
 
-# запуск сервера на macos
+# Start server on macOS
 OMP_NUM_THREADS=1 python server.py
 ```
 
-# 7
+### 7. vLLM Integration (`7_vllm/`)
+Implementation using vLLM for optimized LLM serving:
+- vLLM API server setup
+- Integration with popular LLM models (e.g., GPT-2, TinyLlama)
+- Streaming completion endpoints
+- Performance optimization settings
+- gRPC client-server architecture for vLLM
+
+Setup and running:
 ```bash
+# Install vLLM with gRPC support
 pip install "vllm[grpc]"
 
+# Start vLLM server with GPT-2
 python3 -m vllm.entrypoints.openai.api_server \
     --model gpt2 \
     --port 8081 \
     --tensor-parallel-size 1
 
+# Or start with TinyLlama
 python3 -m vllm.entrypoints.openai.api_server \
     --model TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
     --port 8080 \
@@ -74,13 +126,15 @@ python3 -m vllm.entrypoints.openai.api_server \
     --max-num-seqs 16 \
     --max-num-batched-tokens 4096 \
     --trust-remote-code
-    
 
+# Generate gRPC code
+python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. llm.proto
+
+# Test API endpoints
 curl http://localhost:8080/v1/models
 curl http://localhost:8080/metrics
 
-python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. llm.proto
-
+# Test completion endpoint
 curl http://localhost:8080/v1/completions \
   -H "Content-Type: application/json" \
   -d '{
@@ -89,24 +143,40 @@ curl http://localhost:8080/v1/completions \
     "max_tokens": 100
   }'
 ```
+
+Architecture flow:
 ```
-gRPC клиент (llm_client.py)
+gRPC client (llm_client.py)
         │
         ▼
-gRPC сервер (llm_server.py → LLMService)
+gRPC server (llm_server.py → LLMService)
         │
         ▼
-vLLM API сервер (localhost:8080/v1/completions, stream=True)
+vLLM API server (localhost:8080/v1/completions, stream=True)
         │
         ▼
-[ токены приходят постепенно ]
+[ tokens arrive gradually ]
         │
         ▼
-gRPC сервер читает токены и отправляет клиенту по stream
+gRPC server reads tokens and sends to client via stream
         │
         ▼
-gRPC клиент печатает их в консоль по мере поступления
+gRPC client prints them to console as they arrive
 ```
 
-Docker image
-- https://github.com/vllm-project/vllm/blob/main/docker/Dockerfile.arm
+## Target Audience
+
+This repository is designed for ML engineers who want to learn about:
+- Production deployment of LLMs and ML models
+- Different serving architectures (HTTP, gRPC, Triton)
+- Streaming and real-time inference
+- Performance optimization techniques
+- Container-based deployment
+- Modern API design patterns
+
+## Prerequisites
+
+- Basic understanding of Python and ML concepts
+- Docker installed for containerization examples
+- NVIDIA GPU (optional, for GPU-accelerated examples)
+- Understanding of API concepts (REST, gRPC)
