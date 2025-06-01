@@ -152,9 +152,10 @@ Nginx configuration provides:
 - CORS and security headers
 
 Web Interface Features:
-- MVP chat interface
+- Modern, responsive chat interface
 - Real-time streaming responses
 - Adjustable temperature and max tokens
+- Mobile-friendly design
 
 Testing the deployment:
 ```bash
@@ -210,3 +211,7 @@ This repository is designed for ML engineers who want to learn about:
 - Docker installed for containerization examples
 - NVIDIA GPU (optional, for GPU-accelerated examples)
 - Understanding of API concepts (REST, gRPC)
+
+## Getting Started
+
+Each folder contains its own example with specific instructions in the main README.md. Start with the Docker basics in folder 1 and progress through the examples as they build upon each other in complexity and concepts. 
