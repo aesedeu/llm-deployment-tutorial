@@ -172,6 +172,14 @@ curl http://localhost:8080/v1/completions \
     "prompt": "Hello",
     "max_tokens": 100
   }'
+
+curl http://localhost:8080/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "prompt": "Hello",
+    "max_tokens": 100
+  }'
 ```
 
 Architecture flow:
@@ -192,6 +200,29 @@ gRPC server reads tokens and sends to client via stream
         │
         ▼
 gRPC client prints them to console as they arrive
+```
+
+# 8
+
+# 9
+```bash
+python3 -m vllm.entrypoints.openai.api_server \
+    --model TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
+    --port 8080 \
+    --tensor-parallel-size 1 \
+    --max-num-seqs 16 \
+    --max-num-batched-tokens 4096 \
+    --trust-remote-code
+
+python server.py # run on 8001
+
+curl -N -X POST http://localhost:8001/stream \
+     -H "Content-Type: application/json" \
+     -d '{
+        "message": "Once upon a time",
+        "max_tokens": 100,
+        "temperature": 0.1
+        }'
 ```
 
 ## Target Audience
