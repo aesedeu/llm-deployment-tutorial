@@ -99,7 +99,7 @@ python server.py
 OMP_NUM_THREADS=1 python server.py
 ```
 
-### 7. vLLM Integration (`7_vllm/`)
+### 7. Run vLLM /v1/completions with gRPC (`7_vllm/`)
 Implementation using vLLM for optimized LLM serving:
 - vLLM API server setup
 - Integration with popular LLM models (e.g., GPT-2, TinyLlama)
@@ -165,14 +165,7 @@ curl http://localhost:8080/v1/models
 curl http://localhost:8080/metrics
 
 # Test completion endpoint
-curl http://localhost:8080/v1/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gpt2",
-    "prompt": "Hello",
-    "max_tokens": 100
-  }'
-
+# Запрос из консоли
 curl http://localhost:8080/v1/completions \
   -H "Content-Type: application/json" \
   -d '{
@@ -204,8 +197,9 @@ gRPC client prints them to console as they arrive
 
 # 8
 
-# 9
+# 9 Run vLLM /v1/chat/completions with SSE FastAPI  (`9_sse_fastapi/`)
 ```bash
+# tinyllama
 python3 -m vllm.entrypoints.openai.api_server \
     --model TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
     --port 8080 \
@@ -216,13 +210,91 @@ python3 -m vllm.entrypoints.openai.api_server \
 
 python server.py # run on 8001
 
+# запрос на сервер FastAPI
 curl -N -X POST http://localhost:8001/stream \
      -H "Content-Type: application/json" \
      -d '{
-        "message": "Once upon a time",
+        "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        "message": "Who are you?",
         "max_tokens": 100,
-        "temperature": 0.1
+        "temperature": 0.9
         }'
+```
+
+```bash
+# qwen
+python3 -m vllm.entrypoints.openai.api_server \
+    --model Qwen/Qwen2.5-0.5B-Instruct \
+    --port 8080 \
+    --tensor-parallel-size 1 \
+    --max-num-seqs 16 \
+    --max-num-batched-tokens 32768 \
+    --trust-remote-code
+
+python3 -m vllm.entrypoints.openai.api_server \
+    --model Qwen/Qwen2.5-7B-Instruct \
+    --port 8080 \
+    --tensor-parallel-size 1 \
+    --max-num-seqs 16 \
+    --max-num-batched-tokens 32768 \
+    --trust-remote-code
+
+# Запрос из консоли
+curl http://localhost:8080/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "prompt": "Hello",
+    "max_tokens": 100
+  }'
+
+# запрос на сервер FastAPI
+curl -N -X POST http://localhost:8001/stream \
+     -H "Content-Type: application/json" \
+     -d '{
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "message": "Who is your creator?",
+        "max_tokens": 100,
+        "temperature": 0.9
+        }'
+
+curl -N -X POST http://localhost:8001/stream \
+     -H "Content-Type: application/json" \
+     -d '{
+        "model": "Qwen/Qwen2.5-0.5B-Instruct",
+        "message": "How to cook apple pie?",
+        "max_tokens": 100,
+        "temperature": 1
+        }'
+
+curl -N -X POST http://localhost:8001/stream \
+     -H "Content-Type: application/json" \
+     -d '{
+        "model": "Qwen/Qwen2.5-7B-Instruct",
+        "message": "How to cook apple pie?",
+        "max_tokens": 100,
+        "temperature": 1
+        }'
+```
+
+# 10 Triton vLLM backend
+```bash
+https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/tutorials/Quick_Deploy/vLLM/README.html
+
+wget -P model_repository/vllm_model/1 https://raw.githubusercontent.com/triton-inference-server/vllm_backend/refs/heads/main/samples/model_repository/vllm_model/1/model.json
+wget -P model_repository/vllm_model/ https://raw.githubusercontent.com/triton-inference-server/vllm_backend/refs/heads/main/samples/model_repository/vllm_model/config.pbtxt
+
+docker run -it --net=host --rm \
+  -p 8001:8001 \
+  --shm-size=1G \
+  --ulimit memlock=-1 \
+  --ulimit stack=67108864 \
+  -v ${PWD}:/work \
+  -w /work \
+  nvcr.io/nvidia/tritonserver:25.05-vllm-python-py3 \
+  tritonserver --model-store ./model_repository
+
+docker run -it --net=host -v ${PWD}:/workspace/ nvcr.io/nvidia/tritonserver:25.05-py3-sdk bash
 ```
 
 ## Target Audience

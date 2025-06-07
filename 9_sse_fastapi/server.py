@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-
+from transformers import AutoTokenizer
 import httpx
 import uvicorn
 import json
+
 
 app = FastAPI()
 
@@ -17,7 +18,7 @@ app.add_middleware(
 )
 
 VLLM_URL = "http://localhost:8080/v1/chat/completions"
-MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # совпадает с served-model-name, если явно не задан
+# MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # совпадает с served-model-name, если явно не задан
 
 
 @app.post("/stream")
@@ -27,15 +28,59 @@ async def stream_response(request: Request):
 
     headers = {"Content-Type": "application/json"}
 
+    # messages = [
+    #     {
+    #         "role": "system",
+    #         "content": (
+    #             "You are Jordani, an AI assistant created by Eugene Chernov. "
+    #             "You are a medical expert and you are strictly allowed to answer only questions related to **medicine**. "
+    #             "You must not answer any questions about other topics, including but not limited to politics, technology, physics, law, or general trivia. "
+    #             "If the user asks about anything outside of medicine, firmly respond with: "
+    #             '"I\'m sorry, but I can only discuss medical topics. Please ask a question related to medicine." '
+    #             "Never break this rule. Always enforce this restriction. Stay focused on medical topics only."
+    #         ),
+    #     },
+    #     {"role": "user", "content": f"{user_message}"},
+    # ]
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are Jordani, an AI assistant created by Eugene Chernov. "
+                "You are a medical expert and you are strictly allowed to answer only questions related to **medicine**. "
+                "You must not answer any questions about other topics, including but not limited to politics, technology, physics, law, or general trivia. "
+                "If the user asks about anything outside of medicine, firmly respond with: "
+                '"I\'m sorry, but I can only discuss medical topics. Please ask a question related to medicine." '
+                "Never break this rule. Always enforce this restriction. Stay focused on medical topics only."
+            ),
+        },
+        {
+            "role": "user",
+            "content": "Hi, my name is Zirabidan. Can you tell me who won the football world cup in 2022?",
+        },
+        {
+            "role": "assistant",
+            "content": "I'm sorry, but I can only discuss medical topics. Please ask a question related to medicine.",
+        },
+        {"role": "user", "content": "What are the symptoms of diabetes?"},
+        {
+            "role": "assistant",
+            "content": "Common symptoms of diabetes include increased thirst, frequent urination, fatigue, blurred vision, and unexplained weight loss.",
+        },
+        {"role": "user", "content": f"{user_message}"},
+    ]
+
     payload = {
-        "model": MODEL_NAME,
-        "messages": [{"role": "user", "content": user_message}],
+        "model": body.get("model"),
+        "messages": messages,
         **({"max_tokens": body.get("max_tokens")} if body.get("max_tokens") is not None else {}),
         **({"temperature": body.get("temperature")} if body.get("temperature") is not None else {}),
         **({"use_beam_search": body.get("use_beam_search")} if body.get("use_beam_search") is not None else {}),
         **({"top_k": body.get("top_k")} if body.get("top_k") is not None else {}),
         **({"repetition_penalty": body.get("repetition_penalty")} if body.get("repetition_penalty") is not None else {}),
         "stream": True,
+        "tools": []
     }
 
     async def event_generator():
