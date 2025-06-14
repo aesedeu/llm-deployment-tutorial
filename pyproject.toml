@@ -24,6 +24,7 @@ onnx = "1.14.1"
 skl2onnx = "1.15.0"
 grpcio-tools = "^1.71.0"
 sseclient = "^0.0.27"
+sse-starlette = "^2.3.6"
 
 
 [build-system]
