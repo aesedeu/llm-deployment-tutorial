@@ -35,8 +35,16 @@ Demonstrates two common API implementation approaches:
 Running the example:
 1. Generate gRPC code from protobuf:
 ```bash
+
+# Create gRPC protobuf-files
 cd grpc_data
 python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. model.proto
+
+# Run HTTP server
+python http_server.py
+
+# Run gRPC server
+python grpc_server.py
 ```
 2. Start the server (either HTTP or gRPC)
 3. Test using the provided notebook or Postman (for gRPC, include the `model.proto` file and specify ModelService + Message)
