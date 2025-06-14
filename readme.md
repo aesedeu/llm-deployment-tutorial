@@ -63,19 +63,31 @@ python server.py
 python client.py
 ```
 
-### 4. Bidirectional gRPC Streaming (`4_grpc_bidirectional_stream/`)
+### 4. gRPC Server Streaming (`4_http_sse_stream/`)
+```bash
+python server.py
+python client.py BTC-USD  # Stream Bitcoin prices
+python client.py ETH-USD  # Stream Ethereum prices
+```
+
+### 5. Bidirectional gRPC Streaming (`5_grpc_bidirectional_stream/`)
 Advanced gRPC streaming implementation:
 - Bidirectional streaming between client and server
 - Chat-like application example
 - Real-time communication patterns
 
-Setup:
 ```bash
 python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. chat.proto
+python server.py
+
+# terminal 1:
+python client.py
+# terminal 2:
+python client.py
 ```
 
 
-### 5. NVIDIA Triton Server (`5_triton/`)
+### 6. NVIDIA Triton Server (`6_triton/`)
 Integration with NVIDIA Triton Inference Server:
 - Model deployment using Triton server
 - Support for multiple model formats (ONNX, TensorRT)
@@ -83,11 +95,22 @@ Integration with NVIDIA Triton Inference Server:
 - Model optimization examples
 - FastAPI integration for serving models
 
+**Models list (`triton/models`)**:
+- classic_model
+- bert_model
+- gpt2_model
+
 Setup and running:
 1. Move `triton/bert_trt` to `triton/models` (requires NVIDIA GPU)
 2. Import Grafana dashboard from `dash-grafana-triton.json`
 3. Create models in `research.ipynb` and move to `triton/models/classic_model`
-4. For TensorRT conversion:
+4. Start the project:
+```bash
+# after this command be sure that all the models successfully loaded to triton (see container logs)
+docker compose up -d
+```
+
+5. For TensorRT conversion:
 ```bash
 # Enter TensorRT container
 docker exec -it trtexec_container bash
@@ -102,33 +125,39 @@ trtexec \
     --fp16 \
     --useSpinWait
 ```
-5. Start FastAPI server:
+6. Start FastAPI server:
 ```bash
 python app.py
 ```
+7. Check the availability via .ipynb file attached in the folder. There're a couple examples how to try triton via HTTP protocol.
+8. Visit grafana dashboard (don't forget to create connection to Prometheus) to see metrics.
+9. Try locust to see how dynamic batching works.
 
 
 
-### 6. LLM with gRPC (`6_llm_grpc/`)
+### 7. LLM with gRPC (`7_llm_grpc/`)
 Integration of LLMs with gRPC:
 - LLM-specific gRPC service implementation
 - Support for both CUDA and CPU deployments
 - Optimized for machine learning model serving
 - Protobuf definitions for LLM services
 
-Setup and running:
+
 ```bash
 # Generate gRPC code
 python -m grpc_tools.protoc -I=proto --python_out=. --grpc_python_out=. proto/chat.proto
 
-# Start server on CUDA
+# Start server
 python server.py
 
-# Start server on macOS
+# Start server on macOS (if any troubles with the previous command)
 OMP_NUM_THREADS=1 python server.py
+
+# Try CLI client
+python client.py
 ```
 
-### 7. Run vLLM /v1/completions with gRPC (`7_vllm/`)
+### 8. Run vLLM /v1/completions with gRPC (`8_vllm_grpc/`)
 Implementation using vLLM for optimized LLM serving:
 - vLLM API server setup
 - Integration with popular LLM models (e.g., GPT-2, TinyLlama)
@@ -194,7 +223,7 @@ curl http://localhost:8080/v1/models
 curl http://localhost:8080/metrics
 
 # Test completion endpoint
-# Запрос из консоли
+# CLI request directly to vLLM endpoint
 curl http://localhost:8080/v1/completions \
   -H "Content-Type: application/json" \
   -d '{
@@ -202,17 +231,21 @@ curl http://localhost:8080/v1/completions \
     "prompt": "Hello",
     "max_tokens": 100
   }'
+
+# CLI request to gRPC
+python llm_server.py
+python llm_client.py
 ```
 
-Architecture flow:
+**Architecture flow with CLI:**
 ```
 gRPC client (llm_client.py)
         │
         ▼
-gRPC server (llm_server.py → LLMService)
+gRPC server (llm_server_streaming.py)
         │
         ▼
-vLLM API server (localhost:8080/v1/completions, stream=True)
+vLLM API server (localhost:8080/v1/completions)
         │
         ▼
 [ tokens arrive gradually ]
@@ -224,9 +257,24 @@ gRPC server reads tokens and sends to client via stream
 gRPC client prints them to console as they arrive
 ```
 
-# 8
+**Architecture flow with Web UI:**
+```
+Web UI (nginx static HTML + JS)
+        │
+        ▼
+vLLM API server (localhost:8080/v1/completions)
+        │
+        ▼
+[ tokens arrive gradually ]
+        │
+        ▼
+Web UI server reads tokens and sends to client via stream
+```
 
-# 9 Run vLLM /v1/chat/completions with SSE FastAPI  (`9_sse_fastapi/`)
+### 9 OpenVINO
+TODO
+
+### 10 Run vLLM /v1/chat/completions with SSE FastAPI  (`10_vllm_sse_fastapi/`)
 ```bash
 # tinyllama
 python3 -m vllm.entrypoints.openai.api_server \
@@ -252,6 +300,7 @@ curl -N -X POST http://localhost:8001/stream \
 
 ```bash
 # qwen
+# 0.5B
 python3 -m vllm.entrypoints.openai.api_server \
     --model Qwen/Qwen2.5-0.5B-Instruct \
     --port 8080 \
@@ -260,6 +309,7 @@ python3 -m vllm.entrypoints.openai.api_server \
     --max-num-batched-tokens 32768 \
     --trust-remote-code
 
+# 7B
 python3 -m vllm.entrypoints.openai.api_server \
     --model Qwen/Qwen2.5-7B-Instruct \
     --port 8080 \
@@ -306,8 +356,8 @@ curl -N -X POST http://localhost:8001/stream \
         }'
 ```
 
-# 10 Triton vLLM backend
-```bash
+### 11 Triton vLLM backend
+<!-- ```bash
 https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/tutorials/Quick_Deploy/vLLM/README.html
 
 wget -P model_repository/vllm_model/1 https://raw.githubusercontent.com/triton-inference-server/vllm_backend/refs/heads/main/samples/model_repository/vllm_model/1/model.json
@@ -341,4 +391,21 @@ This repository is designed for ML engineers who want to learn about:
 - Basic understanding of Python and ML concepts
 - Docker installed for containerization examples
 - NVIDIA GPU (optional, for GPU-accelerated examples)
-- Understanding of API concepts (REST, gRPC)
+- Understanding of API concepts (REST, gRPC) -->
+
+### 12 vLLM -> Websocket -> gRPC -> Web UI (`12_vllm_grpc_websocket/`)
+
+```bash
+python3 -m vllm.entrypoints.openai.api_server \
+    --model Qwen/Qwen2.5-0.5B-Instruct \
+    --port 8080 \
+    --tensor-parallel-size 1 \
+    --max-num-seqs 16 \
+    --max-num-batched-tokens 32768 \
+    --trust-remote-code
+
+docker compose up -d
+python llm_server.py
+```
+
+Now create requests via Web UI

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+service LLMService {
+  rpc GenerateText (GenerateRequest) returns (stream GenerateResponse);
+}
+
+message GenerateRequest {
+  string prompt = 1;
+  int32 max_tokens = 2;
+  float temperature = 3;
+}
+
+message GenerateResponse {
+  string token = 1;
+}
