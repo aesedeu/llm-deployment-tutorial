@@ -23,6 +23,7 @@ docker run -d --name nginx_balancer --network nginx_network -p 80:80 -v ./nginx_
 
 # or docker compose
 docker compose up -d
+```
 
 ### 2. HTTP and gRPC Implementation (`2_http_grpc/`)
 Demonstrates two common API implementation approaches:
@@ -33,9 +34,11 @@ Demonstrates two common API implementation approaches:
 - Jupyter notebook for model development and testing
 
 Running the example:
-1. Generate gRPC code from protobuf:
-```bash
+1. Generate gRPC code from protobuf
+2. Start the server (either HTTP or gRPC)
+3. Test using the provided notebook or Postman (for gRPC, include the `model.proto` file and specify ModelService + Message)
 
+```bash
 # Create gRPC protobuf-files
 cd grpc_data
 python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. model.proto
@@ -46,10 +49,33 @@ python http_server.py
 # Run gRPC server
 python grpc_server.py
 ```
-2. Start the server (either HTTP or gRPC)
-3. Test using the provided notebook or Postman (for gRPC, include the `model.proto` file and specify ModelService + Message)
 
-### 3. NVIDIA Triton Server (`3_triton/`)
+
+### 3. gRPC Server Streaming (`3_grpc_server_stream/`)
+Implementation of server-side streaming with gRPC:
+- Demonstrates handling large file transfers
+- Server-side streaming patterns
+- Protobuf definitions for streaming services
+
+```bash
+python -m grpc_tools.protoc -I./proto --python_out=. --grpc_python_out=. ./proto/price_service.proto
+python server.py
+python client.py
+```
+
+### 4. Bidirectional gRPC Streaming (`4_grpc_bidirectional_stream/`)
+Advanced gRPC streaming implementation:
+- Bidirectional streaming between client and server
+- Chat-like application example
+- Real-time communication patterns
+
+Setup:
+```bash
+python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. chat.proto
+```
+
+
+### 5. NVIDIA Triton Server (`5_triton/`)
 Integration with NVIDIA Triton Inference Server:
 - Model deployment using Triton server
 - Support for multiple model formats (ONNX, TensorRT)
@@ -81,27 +107,7 @@ trtexec \
 python app.py
 ```
 
-### 4. gRPC Server Streaming (`4_grpc_server_stream/`)
-Implementation of server-side streaming with gRPC:
-- Demonstrates handling large file transfers
-- Server-side streaming patterns
-- Protobuf definitions for streaming services
 
-Setup:
-```bash
-python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. file_streamer.proto
-```
-
-### 5. Bidirectional gRPC Streaming (`5_grpc_bidirectional_stream/`)
-Advanced gRPC streaming implementation:
-- Bidirectional streaming between client and server
-- Chat-like application example
-- Real-time communication patterns
-
-Setup:
-```bash
-python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. chat.proto
-```
 
 ### 6. LLM with gRPC (`6_llm_grpc/`)
 Integration of LLMs with gRPC:

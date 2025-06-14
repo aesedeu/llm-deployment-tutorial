@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package price_service;
+
+service PriceService {
+  rpc StreamPrices (PriceRequest) returns (stream PriceResponse) {}
+}
+
+message PriceRequest {
+  string symbol = 1;  // e.g., "BTC-USD"
+}
+
+message PriceResponse {
+  string symbol = 1;
+  double price = 2;
+  string timestamp = 3;
+} 
