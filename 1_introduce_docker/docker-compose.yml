@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  nginx_static_1:
+    image: nginx:latest
+    container_name: nginx_static_1
+    volumes:
+      - ./nginx_container_1/index.html:/usr/share/nginx/html/index.html
+    networks:
+      - nginx_network
+
+  nginx_static_2:
+    image: nginx:latest
+    container_name: nginx_static_2
+    volumes:
+      - ./nginx_container_2/index.html:/usr/share/nginx/html/index.html
+    networks:
+      - nginx_network
+
+  nginx_balancer:
+    image: nginx:latest
+    container_name: nginx_balancer
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx_balancer/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - nginx_network
+    depends_on:
+      - nginx_static_1
+      - nginx_static_2
+
+networks:
+  nginx_network:
+    driver: bridge 
