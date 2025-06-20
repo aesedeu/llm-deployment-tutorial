@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: hse-rs
+  labels:
+    app: frontend
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      # лейбл для подбора pod-ов
+      app: frontend
+  template:
+    # Шаблон для создания pod-ов
+    metadata:
+      # лейбл самого pod-а
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: httpd:latest
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
