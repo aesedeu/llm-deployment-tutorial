@@ -1,0 +1,33 @@
+{
+    "id": null,
+    "uid": null,
+    "title": "FastAPI Request Counter",
+    "tags": [
+        "fastapi"
+    ],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "5s",
+    "panels": [
+        {
+            "type": "stat",
+            "title": "Total HTTP Requests",
+            "targets": [
+                {
+                    "expr": "sum(http_requests_total)",
+                    "legendFormat": "Total Requests",
+                    "interval": ""
+                }
+            ],
+            "datasource": "Prometheus",
+            "id": 1,
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 24,
+                "h": 8
+            }
+        }
+    ]
+}
