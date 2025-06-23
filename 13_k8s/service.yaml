@@ -9,3 +9,4 @@ spec:
   - port: 80 # порт сервиса
     targetPort: 80 # порт контейнера в pod-e
   type: ClusterIP
+  # type: LoadBalancer

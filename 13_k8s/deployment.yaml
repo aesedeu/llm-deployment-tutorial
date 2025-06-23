@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hse-deployment
+  name: shvm-deployment
 spec:
   replicas: 6
   strategy:
@@ -18,31 +18,36 @@ spec:
         app: frontend
     spec:
       containers:
-      - name: hse-pod
-        image: nginx:latest
+      - name: shvm-pod
+        # image: nginx:latest
+        image: aesedeu/nginx-shvm-ai:1.0
         env:
-        - name: USERNAME
+        - name: POD_NAME # необходимо чтобы в webui отобразились имена POD
           valueFrom:
-            secretKeyRef:
-              name: my-secret
-              key: username
-        - name: PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: my-secret
-              key: password
+            fieldRef:
+              fieldPath: metadata.name
+        # - name: USERNAME
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: my-secret
+        #       key: username
+        # - name: PASSWORD
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: my-secret
+        #       key: password
         resources:
           limits:
             memory: "128Mi"
             cpu: "500m"
         ports:
         - containerPort: 80
-        volumeMounts:
-        - name: config-volume
-          mountPath: /etc/config
-          readOnly: true
-      volumes:
-      - name: config-volume
-        configMap:
-          name: my-config
+      #   volumeMounts:
+      #   - name: config-volume
+      #     mountPath: /etc/config
+      #     readOnly: true
+      # volumes:
+      # - name: config-volume
+      #   configMap:
+      #     name: my-config
         

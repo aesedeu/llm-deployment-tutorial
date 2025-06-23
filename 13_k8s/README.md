@@ -1,4 +1,14 @@
 # 1
+Выполняем сборку образа и пуш его в репозиторий
+```bash
+docker build --tag=aesedeu/nginx-shvm-ai:1.0 --file=Dockerfile .
+docker push aesedeu/nginx-shvm-ai:1.0
+
+# для локального запуска можно выполнить
+docker run --rm -p 80:80 aesedeu/nginx-shvm-ai:1.0
+```
+
+# 2
 - Запуск minikube
 ```minikube start --vm-driver=docker --cpus=6 --memory=6G --nodes=3```
 - Проверка адреса minikube
@@ -7,7 +17,7 @@
 ```minikube addons enable ingress```
 - Запускаем все сущности из директории (под + сервис + ингресс)
 ```kubectl apply -f .```
-- Открываем туннель (для macOS)
+- Открываем туннель (для macOS) для Ingress
 ```minikube tunnel```
 - Дописываем в `/etc/hosts`:
 ```
@@ -17,15 +27,15 @@
 
 Переходим в бразуер на адрес
 
-# 2
+# 3
 - Удаляем под и видим что теперь ошибка 503 в браузере
 - Поднимаем под и видим что все еще недоступен
 - Нам поможет RS, поднимаем его и видим что у нас 4 пода (1 из POD и 3 из RS). Прилетают разные ответы
 - Удаляем старый под и видим что он автоматически возвращается
 - Теперь применяем деплоймент. Можно удалить RS (перемещаем его и под в `move_after_use`)
-- Смотрим ревизию деплоймента `kubectl rollout history deployment/hse-deployment`
+- Смотрим ревизию деплоймента `kubectl rollout history deployment/shvm-deployment`
 - Меняем образ контейнера, видим постепенно обновление контейнеров
-- Пробуем выполнить откат (при это файл деплоймента не будет изменен) `kubectl rollout undo deployment hse-deployment`
+- Пробуем выполнить откат (при это файл деплоймента не будет изменен) `kubectl rollout undo deployment shvm-deployment`
 - Создаем CM и приписываем его в деплоймент (`/etc/config`)
 - Создаем секреты. Для конвертации из base64:
 ```
