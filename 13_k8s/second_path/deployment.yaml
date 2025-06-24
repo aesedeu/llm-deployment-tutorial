@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shvm-deployment-2
+spec:
+  replicas: 6
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector: # подбирает pod-ы с такими же лейблами
+    matchLabels:
+      app: backend
+  template: # шаблон для создания pod-ов
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: shvm-pod-backend
+        # image: nginx:latest
+        image: httpd:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+        

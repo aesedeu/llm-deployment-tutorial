@@ -10,12 +10,12 @@ docker run --rm -p 80:80 aesedeu/nginx-shvm-ai:1.0
 
 # 2
 - Запуск minikube
-```minikube start --vm-driver=docker --cpus=6 --memory=6G --nodes=3```
+```minikube start --vm-driver=docker --cpus=3 --memory=3G --nodes=3```
 - Проверка адреса minikube
 ```minikube ip```
 - Установка аддона
 ```minikube addons enable ingress```
-- Запускаем все сущности из директории (под + сервис + ингресс)
+- Запускаем сущности из директории (под + сервис + ингресс)
 ```kubectl apply -f .```
 - Открываем туннель (для macOS) для Ingress
 ```minikube tunnel```
@@ -43,3 +43,6 @@ echo -n 'admin' | base64     # → YWRtaW4=
 echo -n 'secret' | base64    # → c2VjcmV0
 ```
 - Прокидываем их в деплоймент
+
+# 4
+Можно дополнительно создать еще один деплоймент, приклеить к нему сервис и прокинуть его на ингресс на отдельный путь

@@ -12,13 +12,11 @@ class PriceServiceServicer(price_service_pb2_grpc.PriceServiceServicer):
         symbol = request.symbol
         while True:
             try:
-                # Fetch real-time price from Coinbase API
                 response = requests.get(f'https://api.coinbase.com/v2/prices/{symbol}/spot')
                 if response.status_code == 200:
                     data = response.json()
                     price = float(data['data']['amount'])
                     
-                    # Create and yield the response
                     price_response = price_service_pb2.PriceResponse(
                         symbol=symbol,
                         price=price,
@@ -26,7 +24,6 @@ class PriceServiceServicer(price_service_pb2_grpc.PriceServiceServicer):
                     )
                     yield price_response
                 
-                # Wait for 1 second before next update
                 time.sleep(1)
                 
             except Exception as e:

@@ -1,13 +1,12 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: hse-pod
+  name: shvm-pod
   labels:
     app: frontend
 spec:
   containers:
   - name: frontend
-    # Название образа. Образ должен быть залит в Registry.
     image: nginx:latest
     resources:
       requests:
