@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from transformers import AutoTokenizer
 import httpx
 import uvicorn
 import json
@@ -11,7 +10,8 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost"],  # или ["*"] для разрешения всех
+    # allow_origins=["http://localhost"],  # или ["*"] для разрешения всех
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -55,21 +55,23 @@ async def stream_response(request: Request):
                 "Never break this rule. Always enforce this restriction. Stay focused on medical topics only."
             ),
         },
-        {
-            "role": "user",
-            "content": "Hi, my name is Zirabidan. Can you tell me who won the football world cup in 2022?",
-        },
-        {
-            "role": "assistant",
-            "content": "I'm sorry, but I can only discuss medical topics. Please ask a question related to medicine.",
-        },
-        {"role": "user", "content": "What are the symptoms of diabetes?"},
-        {
-            "role": "assistant",
-            "content": "Common symptoms of diabetes include increased thirst, frequent urination, fatigue, blurred vision, and unexplained weight loss.",
-        },
+        # {
+        #     "role": "user",
+        #     "content": "Hi, my name is Zirabidan. Can you tell me who won the football world cup in 2022?",
+        # },
+        # {
+        #     "role": "assistant",
+        #     "content": "I'm sorry, but I can only discuss medical topics. Please ask a question related to medicine.",
+        # },
+        # {"role": "user", "content": "What are the symptoms of diabetes?"},
+        # {
+        #     "role": "assistant",
+        #     "content": "Common symptoms of diabetes include increased thirst, frequent urination, fatigue, blurred vision, and unexplained weight loss.",
+        # },
         {"role": "user", "content": f"{user_message}"},
     ]
+
+    print(messages)
 
     payload = {
         "model": body.get("model"),

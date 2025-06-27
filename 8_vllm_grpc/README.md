@@ -73,6 +73,15 @@ curl http://localhost:8080/v1/completions \
     "max_tokens": 100
   }'
 
+curl http://localhost:8080/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "prompt": "Hello",
+    "max_tokens": 100,
+    "stream": true
+  }'
+
 # CLI request to gRPC
 python llm_server.py
 python llm_client.py

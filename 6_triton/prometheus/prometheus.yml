@@ -6,6 +6,6 @@ scrape_configs:
     static_configs:
       - targets: ['triton:8002']  # Сбор метрик с Triton
 
-  - job_name: 'vllm'
-    static_configs:
-      - targets: ['vllm:8080']  # Сбор метрик с vllm
+  # - job_name: 'vllm'
+  #   static_configs:
+  #     - targets: ['vllm:8080']  # Сбор метрик с vllm

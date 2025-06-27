@@ -1,26 +1,9 @@
 ### 10 Run vLLM /v1/chat/completions with SSE FastAPI  (`10_vllm_sse_fastapi/`)
-```bash
-# tinyllama
-python3 -m vllm.entrypoints.openai.api_server \
-    --model TinyLlama/TinyLlama-1.1B-Chat-v1.0 \
-    --port 8080 \
-    --tensor-parallel-size 1 \
-    --max-num-seqs 16 \
-    --max-num-batched-tokens 4096 \
-    --trust-remote-code
 
-python server.py # run on 8001
-
-# запрос на сервер FastAPI
-curl -N -X POST http://localhost:8001/stream \
-     -H "Content-Type: application/json" \
-     -d '{
-        "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-        "message": "Who are you?",
-        "max_tokens": 100,
-        "temperature": 0.9
-        }'
-```
+Требуется 3 консоли:
+- Фронтенд `PORT=3000 serve . -l ` (на macOS предварительно `brew install serve`)
+- FastAPI: `python server.py`
+- vLLM: (выбираем ниже)
 
 ```bash
 # qwen
