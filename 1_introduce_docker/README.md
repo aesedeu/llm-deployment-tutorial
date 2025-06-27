@@ -1,9 +1,3 @@
-# LLM Deployment Examples
-
-This repository contains a collection of examples demonstrating different approaches to deploying Large Language Models (LLMs) and ML models in production. Each folder contains a specific example focusing on different deployment aspects and technologies.
-
-## Repository Structure
-
 ### 1. Docker Basics (`1_introduce_docker/`)
 Introduction to containerization for ML models:
 - Basic Docker setup for ML applications
