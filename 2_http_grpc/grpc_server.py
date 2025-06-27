@@ -1,7 +1,7 @@
 import grpc
 from concurrent import futures
-from grpc_data import model_pb2
-from grpc_data import model_pb2_grpc
+import model_pb2
+import model_pb2_grpc
 import time
 import joblib  # или другая библиотека загрузки модели
 

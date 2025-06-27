@@ -1,7 +1,7 @@
 import asyncio
 import grpc
 import time
-from grpc_data import model_pb2, model_pb2_grpc
+import model_pb2, model_pb2_grpc
 
 SERVER_ADDRESS = "localhost:50051"
 N = 100000
